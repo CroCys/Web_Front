@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GGDEVICE - Обзоры игровых устройств</title>
+    
+        <!-- Подключение стилей -->
+        <link rel="stylesheet" href="css/styles.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+<body>
+
+    <!-- Фон с градиентом -->
+<div class="bg-gradient"></div>
+
+<header>
+    <!-- Логотип с ссылкой на главную страницу -->
+    <a href="/index.html" class="logo-link">
+        <div class="logo">GGDEVICE</div>
+    </a>
+
+    <nav>
+        <!-- Бургер-меню для мобильных устройств -->
+        <button class="burger-menu" id="burgerMenu">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+            <!-- Кнопки для авторизации/регистрации -->
+            <!-- <button id="loginBtn" class="glass-btn">
+                <i class="fas fa-sign-in-alt btn-icon"></i> Войти
+            </button>
+            <button id="registerBtn" class="glass-btn">
+                <i class="fas fa-user-plus btn-icon"></i> Регистрация
+            </button> -->
+
+            <!-- Профиль пользователя (по умолчанию скрыт) -->
+            <div class="user-profile glass-card" id="userProfile" style="display: none;">
+                <button id="profileBtn" class="profile-btn">
+                    <img src="/api/placeholder/40/40" alt="Аватар" class="avatar">
+                    <span id="username">Никнейм</span>
+                    <i class="fas fa-chevron-down btn-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div id="cards-container"></div>
+
+<!-- Подвал страницы -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-left">
+            <p>&copy; 2025 GGDEVICE. Все права защищены.</p>
+        </div>
+        <div class="footer-center">
+            <ul class="footer-links">
+                <li><a href="profile.html">О нас</a></li>
+                <li><a href="/privacy.html">Политика конфиденциальности</a></li>
+                <li><a href="/terms.html">Условия использования</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/storage.js"></script>
+</body>
+</html>
