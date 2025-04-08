@@ -11,8 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
 </head>
 
 <body>
@@ -34,25 +35,27 @@
 
         <div class="nav-links" id="navLinks">
             <!-- Кнопки для авторизации/регистрации -->
-            <!-- <button id="loginBtn" class="glass-btn">
+            <button id="loginBtn" class="glass-btn">
                 <i class="fas fa-sign-in-alt btn-icon"></i> Войти
             </button>
             <button id="registerBtn" class="glass-btn">
                 <i class="fas fa-user-plus btn-icon"></i> Регистрация
-            </button> -->
+            </button>
 
-            <!-- Профиль пользователя (по умолчанию скрыт) -->
-            <div class="user-profile glass-card" id="userProfile" style="display: none;">
-                <button id="profileBtn" class="profile-btn">
-                    <img src="/api/placeholder/40/40" alt="Аватар" class="avatar">
-                    <span id="username">Никнейм</span>
-                    <i class="fas fa-chevron-down btn-icon"></i>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <img src="avatar.png" alt="User avatar" class="profile-avatar"/>
+                <button class="profile-btn" id="profileBtn">
+                    <span id="username"></span>
+                    <span class="btn-icon">▼</span>
                 </button>
+                <div class="profile-dropdown" id="dropdownMenu" style="display: none;">
+                    <button class="dropdown-item" id="profilePageBtn">Профиль</button>
+                    <button class="dropdown-item" id="logoutBtn">Выйти</button>
+                </div>
             </div>
         </div>
     </nav>
 </header>
-
 
 
 <!-- Профиль -->
@@ -71,73 +74,70 @@
 </div>
 
 
-
-
-  
 <!-- Блок рецензий -->
-<div class="reviews-container-main" >
-<div class="reviews-container">
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 1">
-        <div class="review-text">Рецензия 1: Отличный продукт!</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 2">
-        <div class="review-text">Рецензия 2: Хорошее качество, но есть недочеты.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 3">
-        <div class="review-text">Рецензия 3: Не понравилось, ожидал большего.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 4">
-        <div class="review-text">Рецензия 4: Советую к покупке, работает отлично.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 1">
-        <div class="review-text">Рецензия 1: Отличный продукт!</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 2">
-        <div class="review-text">Рецензия 2: Хорошее качество, но есть недочеты.
-            
+<div class="reviews-container-main">
+    <div class="reviews-container">
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 1">
+            <div class="review-text">Рецензия 1: Отличный продукт!</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 2">
+            <div class="review-text">Рецензия 2: Хорошее качество, но есть недочеты.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 3">
+            <div class="review-text">Рецензия 3: Не понравилось, ожидал большего.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 4">
+            <div class="review-text">Рецензия 4: Советую к покупке, работает отлично.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 1">
+            <div class="review-text">Рецензия 1: Отличный продукт!</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 2">
+            <div class="review-text">Рецензия 2: Хорошее качество, но есть недочеты.
+
+            </div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 3">
+            <div class="review-text">Рецензия 3: Не понравилось, ожидал большего.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 4">
+            <div class="review-text">Рецензия 4: Советую к покупке, работает отлично.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 1">
+            <div class="review-text">Рецензия 1: Отличный продукт!</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 2">
+            <div class="review-text">Рецензия 2: Хорошее качество, но есть недочеты.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 3">
+            <div class="review-text">Рецензия 3: Не понравилось, ожидал большего.</div>
+        </div>
+        <div class="review">
+            <img src="images/noImage.png" alt="Продукт 4">
+            <div class="review-text">Рецензия 4: Советую к покупке, работает отлично.</div>
         </div>
     </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 3">
-        <div class="review-text">Рецензия 3: Не понравилось, ожидал большего.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 4">
-        <div class="review-text">Рецензия 4: Советую к покупке, работает отлично.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 1">
-        <div class="review-text">Рецензия 1: Отличный продукт!</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 2">
-        <div class="review-text">Рецензия 2: Хорошее качество, но есть недочеты.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 3">
-        <div class="review-text">Рецензия 3: Не понравилось, ожидал большего.</div>
-    </div>
-    <div class="review">
-        <img src="images/noImage.png" alt="Продукт 4">
-        <div class="review-text">Рецензия 4: Советую к покупке, работает отлично.</div>
-    </div>
-</div>
 </div>
 
 
 <!-- Дисплей инпута для никнейма -->
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-    
-        input[type="file"] {
-            display: none;
-        }
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+    input[type="file"] {
+        display: none;
+    }
 </style>
 
 <!-- Подвал страницы -->

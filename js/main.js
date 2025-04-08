@@ -4,33 +4,36 @@ import {setupNavigation} from "./navigation.js";
 import {fetchDevices} from "./api.js";
 import {startAutoScroll} from "./carousel.js";
 
+// URL API
+const API_BASE_URL = "http://localhost:8081/api"; // Заменить на свой backend url
+
 // Ожидание загрузки DOM
 document.addEventListener("DOMContentLoaded", async () => {
-    // Инициализация навигации и автопрокрутки
     setupNavigation();
     startAutoScroll();
 
-    // Получение модальных окон и кнопок
     const loginModal = document.getElementById("loginModal");
     const registerModal = document.getElementById("registerModal");
     const loginBtn = document.getElementById("loginBtn");
     const registerBtn = document.getElementById("registerBtn");
     const closeModalButtons = document.querySelectorAll(".close-modal");
 
-    // Настройка закрытия модальных окон
+    const userProfile = document.getElementById("userProfile");
+    const usernameSpan = document.getElementById("username");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const profileBtn = document.getElementById("profileBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
     setupModalClosing(loginModal);
     setupModalClosing(registerModal);
 
-    // Открытие модальных окон
     loginBtn.addEventListener("click", () => openModal(loginModal));
     registerBtn.addEventListener("click", () => openModal(registerModal));
 
-    // Закрытие модальных окон по клику на кнопки закрытия
     closeModalButtons.forEach(button =>
         button.addEventListener("click", () => closeModal(button.closest(".modal")))
     );
 
-    // Переключение между окнами авторизации и регистрации
     document.getElementById("switchToRegister").addEventListener("click", () => {
         closeModal(loginModal);
         openModal(registerModal);
@@ -41,45 +44,149 @@ document.addEventListener("DOMContentLoaded", async () => {
         openModal(loginModal);
     });
 
-    // Обработчики для форм входа и регистрации
-    document.getElementById("loginForm").addEventListener("submit", (event) => handleLogin(event, closeModal, loginModal));
-    document.getElementById("registerForm").addEventListener("submit", (event) => handleRegister(event, closeModal, registerModal));
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.target;
+        const email = form.querySelector('input[type="email"]').value.trim();
+        const password = form.querySelector('input[type="password"]').value.trim();
 
-    // Получение данных об устройствах
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password})
+            });
+
+            if (!response.ok) throw new Error("Ошибка входа");
+
+            const data = await response.json();
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("nickname", data.nickname);
+            localStorage.setItem("email", data.email)
+
+            updateUIAfterAuth(data.nickname);
+            closeModal(loginModal);
+        } catch (error) {
+            alert("Неверный email или пароль");
+            console.error(error);
+        }
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.target;
+        const nickname = form.querySelector('input[type="text"]').value.trim();
+        const email = form.querySelector('input[type="email"]').value.trim();
+        const password = form.querySelector('input[type="password"]').value.trim();
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username: nickname, email, password})
+            });
+
+            if (!response.ok) throw new Error("Ошибка регистрации");
+
+            alert("Регистрация успешна! Войдите в аккаунт.");
+            closeModal(registerModal);
+            openModal(loginModal);
+        } catch (error) {
+            alert("Ошибка регистрации");
+            console.error(error);
+        }
+    });
+
+    // Восстановление UI, если токен сохранён
+    const token = localStorage.getItem("token");
+    const savedUsername = localStorage.getItem("username");
+    if (token && savedUsername) {
+        updateUIAfterAuth(savedUsername);
+    }
+
+    document.getElementById("profilePageBtn")?.addEventListener("click", () => {
+        window.location.href = "profile.html";
+    });
+
+
+    // Переключение dropdown профиля
+    profileBtn?.addEventListener("click", (event) => {
+        event.stopPropagation(); // не даём событию уйти вверх
+
+        const isVisible = dropdownMenu.style.display === "block";
+        dropdownMenu.style.display = isVisible ? "none" : "block";
+
+        // Поворачиваем иконку
+        const icon = profileBtn.querySelector(".btn-icon");
+        if (icon) {
+            icon.classList.toggle("rotated", !isVisible);
+        }
+    });
+
+// Закрытие при клике вне
+    document.addEventListener("click", (event) => {
+        const isClickInside = userProfile.contains(event.target);
+        if (!isClickInside) {
+            dropdownMenu.style.display = "none";
+
+            const icon = profileBtn.querySelector(".btn-icon");
+            if (icon) {
+                icon.classList.remove("rotated");
+            }
+        }
+    });
+
+    // Выход
+    logoutBtn?.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        userProfile.style.display = "none";
+        loginBtn.style.display = "inline-block";
+        registerBtn.style.display = "inline-block";
+    });
+
+    // Получение устройств
     const devices = await fetchDevices();
 
     if (devices.length > 0) {
-        // Рендер популярных устройств, отсортированных по рейтингу
         renderDevices(
             devices.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0)).slice(0, 10),
             document.getElementById("popularDevicesCarousel")
         );
 
-        // Сортировка последних устройств по ID (от большего к меньшему)
         const sortedLatestDevices = devices.sort((a, b) => b.id - a.id).slice(0, 10);
 
-        // Рендер последних устройств
         renderDevices(
             sortedLatestDevices,
             document.getElementById("latestDevices")
         );
     } else {
-        // Если устройств нет, выводим предупреждение в консоль
         console.warn("Нет устройств для отображения");
     }
 });
 
-// Функция для рендеринга карточек устройств
+// Обновление интерфейса после авторизации
+function updateUIAfterAuth(username) {
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const userProfile = document.getElementById("userProfile");
+    const usernameSpan = document.getElementById("username");
+
+    loginBtn.style.display = "none";
+    registerBtn.style.display = "none";
+    userProfile.style.display = "flex";
+    usernameSpan.textContent = username;
+}
+
 function renderDevices(devices, container) {
     if (!container) {
         console.error("Ошибка: контейнер не найден");
         return;
     }
 
-    // Генерация HTML для каждой карточки устройства
     container.innerHTML = devices.map(device => `
         <div class="device-card">
-            <img src="${device.images?.[0]?.url || '/images/noImage.png'}" alt="${device.name}" class="device-card-no-image">
+            <img src="${device.images?.[0]?.url || '/images/noImage.png'}" class="device-card-no-image">
             <h3>${device.name}</h3>
             <p>Бренд: ${device.brand}</p>
             <p>Релиз: ${device.releaseDate}</p>
@@ -89,7 +196,6 @@ function renderDevices(devices, container) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Обработчик клика на категории
     const categoryCards = document.querySelectorAll(".category-card");
 
     categoryCards.forEach(card => {
@@ -99,34 +205,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Данные карточек
     const cards = [
-        { id: 1, category: "keyboards", title: "Клавиатура Logitech", description: "Механическая клавиатура" },
-        { id: 2, category: "mice", title: "Мышь Razer", description: "Игровая мышь" },
-        { id: 3, category: "microphones", title: "Микрофон Blue Yeti", description: "Студийный микрофон" },
-        { id: 4, category: "headphones", title: "Наушники Sony", description: "Беспроводные наушники" }
+        {id: 1, category: "keyboards", title: "Клавиатура Logitech", description: "Механическая клавиатура"},
+        {id: 2, category: "mice", title: "Мышь Razer", description: "Игровая мышь"},
+        {id: 3, category: "microphones", title: "Микрофон Blue Yeti", description: "Студийный микрофон"},
+        {id: 4, category: "headphones", title: "Наушники Sony", description: "Беспроводные наушники"}
     ];
 
-    // Фильтрация карточек
     const params = new URLSearchParams(window.location.search);
     const category = params.get("category");
 
-    console.log("Категория из URL:", category);
-
-    let filteredCards = [];
-    if (category) {
-        filteredCards = cards.filter(card => card.category === category);
-    } else {
-        filteredCards = cards;
-    }
-
-    console.log("Отфильтрованные карточки:", filteredCards);
-
-    // Отрисовка карточек
+    let filteredCards = category ? cards.filter(card => card.category === category) : cards;
     renderCards(filteredCards);
 });
 
-// Функция отрисовки карточек
 function renderCards(filteredCards) {
     const container = document.getElementById("cards-container");
 
@@ -148,8 +240,4 @@ function renderCards(filteredCards) {
         `;
         container.appendChild(cardElement);
     });
-
-    console.log("Карточки успешно отрисованы!");
 }
-
-
