@@ -1,28 +1,87 @@
-let scrollInterval; // Переменная для хранения идентификатора интервала автопрокрутки
+/**
+ * Модуль для управления каруселью устройств
+ */
 
-// Функция для запуска автопрокрутки карусели
-export function startAutoScroll() {
-    // Получаем элемент карусели
-    const carousel = document.getElementById("popularDevicesCarousel");
+// Приватные переменные модуля
+let _scrollInterval = null;
+let _carouselElement = null;
 
-    // Функция для автопрокрутки карусели
-    function autoScrollCarousel() {
-        // Вычисляем максимальную возможную прокрутку
-        const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+/**
+ * Инициализирует карусель
+ * @param {string} carouselId - ID элемента карусели
+ * @param {number} scrollInterval - Интервал автоскролла в мс (по умолчанию 3000)
+ * @returns {Object} Объект с методами управления каруселью
+ */
+export function initCarousel(carouselId = "popularDevicesCarousel", scrollInterval = 3000) {
+    const carousel = document.getElementById(carouselId);
 
-        // Прокручиваем карусель влево. Если достигнут конец, возвращаем прокрутку в начало, иначе прокручиваем на 200 пикселей
-        carousel.scrollBy({
-            left: carousel.scrollLeft >= maxScrollLeft ? -carousel.scrollLeft : 200,
-            behavior: 'smooth' // Плавная анимация прокрутки
-        });
+    if (!carousel) {
+        console.error(`Элемент карусели с ID "${carouselId}" не найден`);
+        return null;
     }
 
-    // Устанавливаем интервал автопрокрутки (каждые 3 секунды)
-    scrollInterval = setInterval(autoScrollCarousel, 3000);
+    _carouselElement = carousel;
 
-    // Останавливаем автопрокрутку при наведении мыши на карусель
-    carousel.addEventListener("mouseenter", () => clearInterval(scrollInterval));
+    // Запускаем автоскролл
+    startAutoScroll(scrollInterval);
 
-    // Возобновляем автопрокрутку, когда мышь покидает область карусели
-    carousel.addEventListener("mouseleave", startAutoScroll);
+    // Настраиваем обработчики событий
+    carousel.addEventListener("mouseenter", stopAutoScroll);
+    carousel.addEventListener("mouseleave", () => startAutoScroll(scrollInterval));
+
+    // Возвращаем публичный интерфейс
+    return {
+        start: () => startAutoScroll(scrollInterval),
+        stop: stopAutoScroll,
+        scrollNext: () => scrollCarousel(true),
+        scrollPrev: () => scrollCarousel(false),
+        element: carousel
+    };
+}
+
+/**
+ * Запускает автоматическую прокрутку карусели
+ * @param {number} interval - Интервал между прокрутками в мс
+ */
+export function startAutoScroll(interval = 3000) {
+    // Остановить предыдущий интервал, если он существует
+    stopAutoScroll();
+
+    // Установить новый интервал
+    _scrollInterval = setInterval(() => scrollCarousel(true), interval);
+}
+
+/**
+ * Останавливает автоматическую прокрутку
+ */
+export function stopAutoScroll() {
+    if (_scrollInterval) {
+        clearInterval(_scrollInterval);
+        _scrollInterval = null;
+    }
+}
+
+/**
+ * Прокручивает карусель
+ * @param {boolean} forward - Направление прокрутки (true - вперёд, false - назад)
+ */
+function scrollCarousel(forward = true) {
+    if (!_carouselElement) return;
+
+    const maxScroll = _carouselElement.scrollWidth - _carouselElement.clientWidth;
+    const isAtEnd = _carouselElement.scrollLeft >= maxScroll - 10;
+    const isAtStart = _carouselElement.scrollLeft <= 10;
+
+    let scrollAmount = 0;
+
+    if (forward) {
+        scrollAmount = isAtEnd ? -_carouselElement.scrollLeft : 200;
+    } else {
+        scrollAmount = isAtStart ? maxScroll - _carouselElement.scrollLeft : -200;
+    }
+
+    _carouselElement.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+    });
 }

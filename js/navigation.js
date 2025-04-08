@@ -1,21 +1,82 @@
-// Функция для настройки навигации и обработки открытия/закрытия бургер-меню
-export function setupNavigation() {
-    // Получаем элементы бургер-меню и навигационных ссылок
-    const burgerMenu = document.getElementById('burgerMenu');
-    const navLinks = document.getElementById('navLinks');
+/**
+ * Модуль для управления навигацией и мобильным меню
+ */
 
-    // Обработчик события для открытия/закрытия бургер-меню
-    burgerMenu.addEventListener('click', () => {
-        // Переключаем класс 'show' для отображения или скрытия меню
-        navLinks.classList.toggle('show');
-    });
+/**
+ * Класс для управления навигацией
+ */
+export class Navigation {
+    /**
+     * @param {Object} options - Опции навигации
+     * @param {string} options.burgerMenuId - ID элемента бургер-меню
+     * @param {string} options.navLinksId - ID элемента с навигационными ссылками
+     * @param {string[]} options.closeButtonIds - Массив ID элементов, закрывающих меню при клике
+     */
+    constructor({
+                    burgerMenuId = 'burgerMenu',
+                    navLinksId = 'navLinks',
+                    closeButtonIds = ["loginBtn", "registerBtn", "profileBtn", "switchToRegister", "switchToLogin"]
+                } = {}) {
+        this.burgerMenu = document.getElementById(burgerMenuId);
+        this.navLinks = document.getElementById(navLinksId);
+        this.closeButtons = closeButtonIds.map(id => document.getElementById(id)).filter(Boolean);
 
-    // Функция для закрытия бургер-меню
-    function closeBurgerMenu() {
-        navLinks.classList.remove('show'); // Убираем класс 'show', чтобы скрыть меню
+        if (!this.burgerMenu || !this.navLinks) {
+            console.error('Элементы навигации не найдены');
+            return;
+        }
+
+        this.init();
     }
 
-    // Добавляем обработчики событий для кнопок, которые закрывают бургер-меню
-    document.querySelectorAll("#loginBtn, #registerBtn, #profileBtn, #switchToRegister, #switchToLogin")
-        .forEach(button => button.addEventListener("click", closeBurgerMenu));
+    /**
+     * Инициализирует навигацию
+     */
+    init() {
+        // Настраиваем переключение бургер-меню
+        this.burgerMenu.addEventListener('click', () => this.toggleMenu());
+
+        // Добавляем обработчики для кнопок закрытия меню
+        this.closeButtons.forEach(button => {
+            button.addEventListener('click', () => this.closeMenu());
+        });
+
+        // Закрываем меню при изменении размера окна (адаптивность)
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) { // Для десктопных экранов
+                this.closeMenu();
+            }
+        });
+    }
+
+    /**
+     * Переключает состояние меню
+     */
+    toggleMenu() {
+        this.navLinks.classList.toggle('show');
+        this.burgerMenu.classList.toggle('active');
+    }
+
+    /**
+     * Закрывает меню
+     */
+    closeMenu() {
+        this.navLinks.classList.remove('show');
+        this.burgerMenu.classList.remove('active');
+    }
+
+    /**
+     * Открывает меню
+     */
+    openMenu() {
+        this.navLinks.classList.add('show');
+        this.burgerMenu.classList.add('active');
+    }
+}
+
+/**
+ * Настраивает навигацию (совместимость со старым кодом)
+ */
+export function setupNavigation() {
+    return new Navigation();
 }

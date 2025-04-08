@@ -1,33 +1,104 @@
-// Функция для открытия модального окна
-export function openModal(modal) {
-    // Устанавливаем стиль для отображения модального окна
-    modal.style.display = "flex";
+/**
+ * Модуль для работы с модальными окнами
+ */
 
-    // Добавляем анимацию для плавного появления
-    setTimeout(() => {
-        modal.style.opacity = 1; // Устанавливаем непрозрачность на 1
-        modal.querySelector(".modal-content").style.transform = "scale(1)"; // Снимаем масштабирование
-    }, 10); // Задержка перед анимацией для обеспечения плавности
-}
+const ANIMATION_DURATION = 300; // мс
 
-// Функция для закрытия модального окна
-export function closeModal(modal) {
-    // Устанавливаем анимацию скрытия модального окна
-    modal.style.opacity = 0; // Делаем окно прозрачным
-    modal.querySelector(".modal-content").style.transform = "scale(0.8)"; // Уменьшаем размер контента
+/**
+ * Класс для управления модальными окнами
+ */
+export class Modal {
+    /**
+     * @param {HTMLElement|string} modal - Элемент модального окна или его ID
+     */
+    constructor(modal) {
+        this.modal = typeof modal === 'string' ? document.getElementById(modal) : modal;
+        this.content = this.modal?.querySelector('.modal-content');
 
-    // Закрываем модальное окно после завершения анимации
-    setTimeout(() => {
-        modal.style.display = "none"; // Скрываем окно
-    }, 300); // Задержка для окончания анимации
-}
-
-// Функция для настройки закрытия модального окна при клике за его пределами
-export function setupModalClosing(modal) {
-    modal.addEventListener("click", (e) => {
-        // Закрываем модальное окно, если клик был вне содержимого окна
-        if (e.target === modal) {
-            closeModal(modal);
+        if (!this.modal || !this.content) {
+            console.error('Модальное окно или его содержимое не найдено');
+            return;
         }
-    });
+
+        // Автоматически настраиваем закрытие при клике вне контента
+        this.setupOutsideClickHandling();
+    }
+
+    /**
+     * Открывает модальное окно
+     * @param {Function} callback - Функция обратного вызова после открытия
+     */
+    open(callback) {
+        if (!this.modal) return;
+
+        this.modal.style.display = 'flex';
+
+        // Запускаем анимацию с небольшой задержкой
+        setTimeout(() => {
+            this.modal.style.opacity = '1';
+            this.content.style.transform = 'scale(1)';
+
+            if (typeof callback === 'function') {
+                setTimeout(callback, ANIMATION_DURATION);
+            }
+        }, 10);
+    }
+
+    /**
+     * Закрывает модальное окно
+     * @param {Function} callback - Функция обратного вызова после закрытия
+     */
+    close(callback) {
+        if (!this.modal) return;
+
+        // Запускаем анимацию закрытия
+        this.modal.style.opacity = '0';
+        this.content.style.transform = 'scale(0.8)';
+
+        // Скрываем модальное окно после завершения анимации
+        setTimeout(() => {
+            this.modal.style.display = 'none';
+
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }, ANIMATION_DURATION);
+    }
+
+    /**
+     * Настраивает закрытие при клике вне контента модального окна
+     */
+    setupOutsideClickHandling() {
+        if (!this.modal) return;
+
+        this.modal.addEventListener('click', (event) => {
+            if (event.target === this.modal) {
+                this.close();
+            }
+        });
+    }
+}
+
+/**
+ * Открывает модальное окно (совместимость со старым кодом)
+ * @param {HTMLElement} modal - Элемент модального окна
+ */
+export function openModal(modal) {
+    new Modal(modal).open();
+}
+
+/**
+ * Закрывает модальное окно (совместимость со старым кодом)
+ * @param {HTMLElement} modal - Элемент модального окна
+ */
+export function closeModal(modal) {
+    new Modal(modal).close();
+}
+
+/**
+ * Настраивает закрытие модального окна при клике вне содержимого
+ * @param {HTMLElement} modal - Элемент модального окна
+ */
+export function setupModalClosing(modal) {
+    new Modal(modal).setupOutsideClickHandling();
 }

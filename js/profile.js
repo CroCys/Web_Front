@@ -1,84 +1,211 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const avatarInput = document.getElementById("avatar-input");
-    const avatarImg = document.getElementById("avatar-img");
-    const nicknameInput = document.getElementById("nickname");
+/**
+ * Модуль для управления профилем пользователя
+ */
+import {Auth, updateUIAfterAuth} from './auth.js';
 
-    const loginBtn = document.getElementById("loginBtn");
-    const registerBtn = document.getElementById("registerBtn");
-    const userProfile = document.getElementById("userProfile");
-    const usernameSpan = document.getElementById("username");
-    const profileBtn = document.getElementById("profileBtn");
-    const dropdownMenu = document.getElementById("dropdownMenu");
-    const logoutBtn = document.getElementById("logoutBtn");
+/**
+ * Класс для управления профилем пользователя
+ */
+export class UserProfile {
+    /**
+     * @param {Object} options - Опции профиля
+     * @param {string} options.avatarInputId - ID элемента ввода аватара
+     * @param {string} options.avatarImgId - ID элемента изображения аватара
+     * @param {string} options.nicknameInputId - ID элемента ввода никнейма
+     * @param {string} options.profileBtnId - ID кнопки профиля
+     * @param {string} options.dropdownMenuId - ID выпадающего меню
+     * @param {string} options.logoutBtnId - ID кнопки выхода
+     */
+    constructor({
+                    avatarInputId = 'avatar-input',
+                    avatarImgId = 'avatar-img',
+                    nicknameInputId = 'nickname',
+                    profileBtnId = 'profileBtn',
+                    dropdownMenuId = 'dropdownMenu',
+                    logoutBtnId = 'logoutBtn'
+                } = {}) {
+        // Получаем DOM элементы
+        this.avatarInput = document.getElementById(avatarInputId);
+        this.avatarImg = document.getElementById(avatarImgId);
+        this.nicknameInput = document.getElementById(nicknameInputId);
+        this.profileBtn = document.getElementById(profileBtnId);
+        this.dropdownMenu = document.getElementById(dropdownMenuId);
+        this.logoutBtn = document.getElementById(logoutBtnId);
 
-    // ✅ Проверка авторизации
-    const token = localStorage.getItem("token");
-    const nickname = localStorage.getItem("nickname");
-
-    if (token && nickname) {
-        userProfile.style.display = "flex";
-        loginBtn.style.display = "none";
-        registerBtn.style.display = "none";
-        usernameSpan.textContent = nickname;
-    } else {
-        // ❌ Если не авторизован — редирект на главную
-        window.location.href = "index.html";
-        return;
-    }
-
-    // 🔄 Dropdown поведение
-    profileBtn?.addEventListener("click", () => {
-        const isOpen = dropdownMenu.style.display === "block";
-        dropdownMenu.style.display = isOpen ? "none" : "block";
-        profileBtn.classList.toggle("open", !isOpen); // Для анимации ▼
-    });
-
-    // ⛔ Клик вне dropdown — закрытие
-    document.addEventListener("click", (event) => {
-        if (!profileBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
-            dropdownMenu.style.display = "none";
-            profileBtn.classList.remove("open");
+        // Проверяем наличие основных элементов
+        if (!this.avatarInput || !this.avatarImg || !this.nicknameInput) {
+            console.error('Элементы профиля не найдены');
+            return;
         }
-    });
 
-    // 🚪 Выход
-    logoutBtn?.addEventListener("click", () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("avatar");
-        localStorage.removeItem("nickname");
-        window.location.href = "index.html";
-    });
-
-    // 🖼️ Аватарка из localStorage
-    const savedAvatar = localStorage.getItem("avatar");
-    if (savedAvatar) {
-        avatarImg.src = savedAvatar;
+        // Инициализация
+        this.init();
     }
 
-    // 🧑‍💼 Никнейм из localStorage
-    const savedNickname = localStorage.getItem("nickname");
-    if (savedNickname) {
-        nicknameInput.value = savedNickname;
-    } else {
-        nicknameInput.value = nickname; // если нет кастомного — от бэка
+    /**
+     * Инициализирует профиль пользователя
+     */
+    init() {
+        // Проверяем авторизацию
+        if (!Auth.isAuthenticated()) {
+            // Перенаправляем на главную, если пользователь не авторизован
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Загружаем данные пользователя из хранилища
+        const userData = Auth.getCurrentUser();
+
+        // Обновляем UI
+        updateUIAfterAuth(userData.nickname);
+
+        // Загружаем аватар из localStorage
+        if (userData.avatar && this.avatarImg) {
+            this.avatarImg.src = userData.avatar;
+        }
+
+        // Устанавливаем никнейм
+        if (this.nicknameInput) {
+            this.nicknameInput.value = userData.nickname || '';
+        }
+
+        // Настраиваем обработчики событий
+        this.setupEventListeners();
     }
 
-    // 📤 Загрузка аватарки
-    avatarInput.addEventListener("change", function () {
-        const file = this.files[0];
+    /**
+     * Настраивает обработчики событий
+     */
+    setupEventListeners() {
+        // Обработчик загрузки аватара
+        if (this.avatarInput && this.avatarImg) {
+            this.avatarInput.addEventListener('change', this.handleAvatarChange.bind(this));
+        }
+
+        // Обработчик изменения никнейма
+        if (this.nicknameInput) {
+            this.nicknameInput.addEventListener('input', this.handleNicknameChange.bind(this));
+        }
+
+        // Обработчик кнопки выпадающего меню
+        if (this.profileBtn && this.dropdownMenu) {
+            this.profileBtn.addEventListener('click', this.toggleDropdown.bind(this));
+
+            // Закрытие dropdown при клике вне
+            document.addEventListener('click', this.handleOutsideClick.bind(this));
+        }
+
+        // Обработчик кнопки выхода
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener('click', this.handleLogout.bind(this));
+        }
+    }
+
+    /**
+     * Обрабатывает изменение аватара
+     * @param {Event} event - Событие изменения
+     */
+    handleAvatarChange(event) {
+        const file = event.target.files[0];
+
         if (file) {
+            // Проверяем тип файла
+            if (!file.type.match('image.*')) {
+                alert('Пожалуйста, выберите изображение');
+                return;
+            }
+
+            // Проверяем размер файла (макс. 5 МБ)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Размер файла не должен превышать 5 МБ');
+                return;
+            }
+
             const reader = new FileReader();
-            reader.onload = function (e) {
-                avatarImg.src = e.target.result;
-                localStorage.setItem("avatar", e.target.result);
+
+            reader.onload = (e) => {
+                // Обновляем изображение аватара
+                this.avatarImg.src = e.target.result;
+
+                // Сохраняем аватар в хранилище
+                Auth.updateAvatar(e.target.result);
             };
+
             reader.readAsDataURL(file);
         }
-    });
+    }
 
-    // ✍️ Изменение никнейма + запрет русского
-    nicknameInput.addEventListener("input", function () {
-        this.value = this.value.replace(/[а-яА-ЯёЁ]/g, '');
-        localStorage.setItem("nickname", this.value);
+    /**
+     * Обрабатывает изменение никнейма
+     * @param {Event} event - Событие изменения
+     */
+    handleNicknameChange(event) {
+        // Удаляем кириллические символы
+        event.target.value = event.target.value.replace(/[а-яА-ЯёЁ]/g, '');
+
+        // Сохраняем никнейм в хранилище
+        Auth.updateNickname(event.target.value);
+
+        // Обновляем отображение никнейма в интерфейсе
+        const usernameSpan = document.getElementById('username');
+        if (usernameSpan) {
+            usernameSpan.textContent = event.target.value;
+        }
+    }
+
+    /**
+     * Переключает отображение выпадающего меню
+     * @param {Event} event - Событие клика
+     */
+    toggleDropdown(event) {
+        event.stopPropagation();
+
+        const isOpen = this.dropdownMenu.style.display === 'block';
+        this.dropdownMenu.style.display = isOpen ? 'none' : 'block';
+
+        // Анимация иконки
+        this.profileBtn.classList.toggle('open', !isOpen);
+    }
+
+    /**
+     * Обрабатывает клик вне выпадающего меню
+     * @param {Event} event - Событие клика
+     */
+    handleOutsideClick(event) {
+        if (this.profileBtn && this.dropdownMenu) {
+            if (!this.profileBtn.contains(event.target) && !this.dropdownMenu.contains(event.target)) {
+                this.dropdownMenu.style.display = 'none';
+                this.profileBtn.classList.remove('open');
+            }
+        }
+    }
+
+    /**
+     * Обрабатывает выход из аккаунта
+     */
+    handleLogout() {
+        // Очищаем данные аутентификации и хранилища
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userNickname');
+        localStorage.removeItem('userAvatar');
+
+        // Выполняем логаут через Auth
+        Auth.logout(() => {
+            // Перенаправляем на главную страницу
+            window.location.href = 'index.html';
+        });
+    }
+}
+
+/**
+ * Инициализирует профиль пользователя с настройками по умолчанию
+ */
+export function initUserProfile() {
+    document.addEventListener('DOMContentLoaded', () => {
+        new UserProfile();
     });
-});
+}
+
+// Автоматически инициализируем профиль при загрузке страницы
+initUserProfile();

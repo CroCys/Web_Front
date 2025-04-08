@@ -33,20 +33,23 @@
 
         <div class="nav-links" id="navLinks">
             <!-- Кнопки для авторизации/регистрации -->
-            <!-- <button id="loginBtn" class="glass-btn">
+            <button id="loginBtn" class="glass-btn">
                 <i class="fas fa-sign-in-alt btn-icon"></i> Войти
             </button>
             <button id="registerBtn" class="glass-btn">
                 <i class="fas fa-user-plus btn-icon"></i> Регистрация
-            </button> -->
+            </button>
 
-            <!-- Профиль пользователя (по умолчанию скрыт) -->
-            <div class="user-profile glass-card" id="userProfile" style="display: none;">
-                <button id="profileBtn" class="profile-btn">
-                    <img src="/api/placeholder/40/40" alt="Аватар" class="avatar">
-                    <span id="username">Никнейм</span>
-                    <i class="fas fa-chevron-down btn-icon"></i>
+            <div class="user-profile" id="userProfile" style="display: none;">
+                <img src="avatar.png" alt="User avatar" class="profile-avatar"/>
+                <button class="profile-btn" id="profileBtn">
+                    <span id="username"></span>
+                    <span class="btn-icon">▼</span>
                 </button>
+                <div class="profile-dropdown" id="dropdownMenu" style="display: none;">
+                    <button class="dropdown-item" id="profilePageBtn">Профиль</button>
+                    <button class="dropdown-item" id="logoutBtn">Выйти</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -62,9 +65,9 @@
         </div>
         <div class="footer-center">
             <ul class="footer-links">
-                <li><a href="profile.html">О нас</a></li>
-                <li><a href="Privacy_Policy.html" target="_blank">Политика конфиденциальности</a></li>
-                <li><a href="/terms.html">Условия использования</a></li>
+                <li><a href="">О нас</a></li>
+                <li><a href="/privacy-policy.html" target="_blank">Политика конфиденциальности</a></li>
+                <li><a href="">Условия использования</a></li>
             </ul>
         </div>
     </div>
