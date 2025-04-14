@@ -89,7 +89,7 @@ export class Auth {
             const response = await fetch(`${AUTH_CONFIG.BASE_URL}${AUTH_CONFIG.ENDPOINTS.REGISTER}`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username: nickname, email, password})
+                body: JSON.stringify({nickname, email, password})
             });
 
             if (!response.ok) {

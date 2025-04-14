@@ -7,6 +7,7 @@ import {fetchDevices} from './api.js';
 import {initCarousel} from './carousel.js';
 import {Auth, updateUIAfterAuth} from './auth.js';
 import {DeviceRenderer} from './device-renderer.js';
+import {showToast} from "./toast.js";
 
 // Конфигурация приложения
 const APP_CONFIG = {
@@ -30,7 +31,18 @@ class App {
         setupNavigation();
 
         // Инициализируем карусель
-        initCarousel();
+        initCarousel("popularDevicesCarousel", {
+            autoScroll: true,
+            scrollInterval: 3000,
+            enableDrag: true,
+            enableWheel: true
+        });
+
+        initCarousel("latestDevices", {
+            autoScroll: false,
+            enableDrag: true,
+            enableWheel: true
+        });
 
         // Настраиваем работу с модальными окнами
         this.setupModals();
@@ -127,8 +139,9 @@ class App {
             const userData = await Auth.login(email, password);
             updateUIAfterAuth(userData.nickname);
             closeModal(document.getElementById("loginModal"));
+            showToast("Вы успешно вошли", "success")
         } catch (error) {
-            alert("Неверный email или пароль");
+            showToast("Неверный email или пароль", "error");
             console.error("Ошибка входа:", error);
         }
     }
@@ -147,11 +160,15 @@ class App {
 
         try {
             await Auth.register(nickname, email, password);  // Передаем значения в функцию регистрации
-            alert("Регистрация успешна! Войдите в аккаунт.");
+            showToast("Регистрация успешна", "success")
             closeModal(document.getElementById("registerModal"));
             openModal(document.getElementById("loginModal"));
+
+            const loginForm = document.querySelector("#loginModal form");
+            loginForm.querySelector('input[type="email"]').value = email;
+            loginForm.querySelector('input[type="password"]').value = password;
         } catch (error) {
-            alert("Ошибка регистрации");
+            showToast("Ошибка регистрации", "error")
             console.error("Ошибка регистрации:", error);
         }
     }
@@ -236,7 +253,7 @@ class App {
                 if (popularCarousel) {
                     this.deviceRenderer.renderDevices(popularDevices, popularCarousel, (device) => {
                         // Обработчик клика по устройству
-                        window.location.href = `device.html?id=${device.id}`;
+                        window.location.href = `device.html?id=${device.id}`; 
                     });
                 }
 

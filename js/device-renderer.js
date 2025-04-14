@@ -58,29 +58,43 @@ export class DeviceRenderer {
      * @returns {HTMLElement} Элемент карточки
      */
     createDeviceCard(device) {
-        const card = document.createElement('div');
-        card.className = 'device-card';
-        card.dataset.id = device.id;
+    const card = document.createElement('div');
+    card.className = 'device-card no-select'; // запрещаем выделение текста
+    card.dataset.id = device.id;
 
-        // Получаем URL изображения
-        const imageUrl = device.images?.length > 0 && device.images[0]?.url
-            ? device.images[0].url
-            : this.defaultImageUrl;
+    const imageUrl = device.images?.length > 0 && device.images[0]?.url
+        ? device.images[0].url
+        : this.defaultImageUrl;
 
-        // Формируем HTML содержимое карточки
-        card.innerHTML = `
-      <img src="${imageUrl}" class="device-card-image" alt="${device.name}" 
-           onerror="this.src='${this.defaultImageUrl}'">
-      <h3 class="device-card-title">${this.escapeHtml(device.name)}</h3>
-      <div class="device-card-info">
+    // Создаём IMG вручную, чтобы отключить drag
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = device.name;
+    img.className = 'device-card-image no-drag';
+    img.onerror = () => img.src = this.defaultImageUrl;
+    img.setAttribute('draggable', 'false'); // запрет на drag
+
+    // Заголовок
+    const title = document.createElement('h3');
+    title.className = 'device-card-title';
+    title.textContent = this.escapeHtml(device.name);
+
+    // Инфо-блок
+    const info = document.createElement('div');
+    info.className = 'device-card-info';
+    info.innerHTML = `
         <p>Бренд: ${this.escapeHtml(device.brand || 'Не указан')}</p>
         <p>Релиз: ${this.formatDate(device.releaseDate)}</p>
         <p>Рейтинг: ${this.formatRating(device.averageRating)}</p>
-      </div>
     `;
 
-        return card;
-    }
+    // Собираем всё в карточку
+    card.appendChild(img);
+    card.appendChild(title);
+    card.appendChild(info);
+
+    return card;
+}
 
     /**
      * Рендерит список категорий

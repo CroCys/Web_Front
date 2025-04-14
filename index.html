@@ -39,7 +39,7 @@
             </button>
 
             <div class="user-profile" id="userProfile" style="display: none;">
-                <img src="avatar.png" alt="User avatar" class="profile-avatar"/>
+                <img src="images/noImage.png" alt="User avatar" class="profile-avatar"/>
                 <button class="profile-btn" id="profileBtn">
                     <span id="username"></span>
                     <span class="btn-icon">▼</span>
@@ -134,13 +134,13 @@
         <div class="modal-body">
             <form id="registerForm">
                 <div class="input-group">
-                    <input type="text", name="nickname" placeholder="Никнейм" required>
+                    <input type="text" name="nickname" placeholder="Никнейм" required>
                 </div>
                 <div class="input-group">
-                    <input type="email", name="email" placeholder="Email" required>
+                    <input type="email" name="email" placeholder="Email" required>
                 </div>
                 <div class="input-group">
-                    <input type="password", name="password" placeholder="Пароль" required>
+                    <input type="password" name="password" placeholder="Пароль" required>
                 </div>
                 <button type="submit" class="glass-btn full-width">Зарегистрироваться</button>
             </form>
@@ -170,6 +170,7 @@
 <!-- Подключение скрипта -->
 <script type="module" src="js/main.js"></script>
 
+<div id="toast" class="toast"></div>
 </body>
 
 </html>

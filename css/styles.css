@@ -19,6 +19,16 @@
     transition: all 0.3s ease;
 }
 
+.no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.no-drag {
+    -webkit-user-drag: none;
+}
+
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -231,9 +241,19 @@ header {
 /* Cards Layouts */
 .carousel, .device-grid {
     display: flex;
-    gap: 20px;
+    gap: 40px;
     overflow-x: auto;
     padding: 50px;
+}
+
+section.popular-devices,
+section.latest-devices {
+    max-width: 1600px;
+    /* Ширина контента */
+    margin: 0 auto;
+    /* Центрирование по горизонтали */
+    padding: 0 20px;
+    /* Отступы по бокам */
 }
 
 /* Device Cards */
@@ -284,6 +304,7 @@ header {
     margin-bottom: 10px;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: color 0.3s ease, transform 0.3s ease;
+    user-select: none
 }
 
 .device-card p {
@@ -294,6 +315,7 @@ header {
     opacity: 0.8;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    user-select: none
 }
 
 .device-card:hover h3 {
@@ -672,6 +694,43 @@ input {
 .dropdown-item:hover {
     background: rgba(110, 66, 245, 0.12);
     color: var(--glass-color-hover);
+}
+
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    backdrop-filter: blur(6px);
+    color: var(--text-primary);
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-success {
+    background: rgba(0, 200, 100, 0.85);
+}
+
+.toast-error {
+    background: rgba(255, 60, 60, 0.85);
+}
+
+.toast-info {
+    background: rgba(60, 130, 255, 0.5);
+}
+
+.toast-warn {
+    background: rgba(255, 180, 40, 0.85);
 }
 
 /* Scrollbar */
