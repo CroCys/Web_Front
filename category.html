@@ -57,8 +57,73 @@
     </nav>
 </header>
 
-<div id="cards-container"></div>
-<div class="pagination" id="pagination-container"></div>
+<!-- Основной контейнер с заголовком категории -->
+<div class="category-page-container">
+    <h1 class="category-title" id="categoryTitle"></h1>
+
+    <!-- Каталог устройств -->
+    <main class="catalog-container">
+        <aside class="filters-panel">
+            <h3>Фильтры</h3>
+
+            <div class="filter-group">
+                <label for="categorySelect">Категория:</label>
+                <select id="categorySelect">
+                    <option value="">Все</option>
+                    <option value="MOUSE">Мыши</option>
+                    <option value="KEYBOARD">Клавиатуры</option>
+                    <option value="HEADPHONES">Гарнитуры</option>
+                    <option value="MICROPHONE">Микрофоны</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="brandInput">Бренд:</label>
+                <input type="text" id="brandInput" placeholder="Например, Logitech">
+            </div>
+
+            <div class="filter-group">
+                <label>Рейтинг:</label>
+                <div class="range-inputs">
+                    <input type="number" id="minRating" placeholder="От" step="0.1" min="0" max="5">
+                    <input type="number" id="maxRating" placeholder="До" step="0.1" min="0" max="5">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Дата выхода:</label>
+                <div class="range-inputs">
+                    <input type="date" id="minDate">
+                    <input type="date" id="maxDate">
+                </div>
+            </div>
+
+            <button id="applyFilters" class="glass-btn filter-btn">
+                <i class="fas fa-filter"></i> Применить
+            </button>
+
+            <button id="resetFilters" class="glass-btn reset-btn">
+                <i class="fas fa-undo"></i> Сбросить
+            </button>
+        </aside>
+
+        <section class="catalog-main">
+            <div class="sort-bar">
+                <label for="sortSelect">Сортировка:</label>
+                <select id="sortSelect">
+                    <option value="name,asc">Название ↑</option>
+                    <option value="name,desc">Название ↓</option>
+                    <option value="averageRating,desc">Рейтинг ↓</option>
+                    <option value="releaseDate,desc">Новизна ↓</option>
+                    <option value="releaseDate,asc">Старые первыми ↑</option>
+                </select>
+            </div>
+
+            <div id="cards-container" class="category-cards-grid"></div>
+            <div class="pagination" id="pagination-container"></div>
+        </section>
+    </main>
+</div>
 
 <!-- Подвал страницы -->
 <footer class="footer">
@@ -75,6 +140,7 @@
         </div>
     </div>
 </footer>
+
 <script type="module" src="js/main.js"></script>
 </body>
 
