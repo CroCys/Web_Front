@@ -42,6 +42,8 @@ export function initCarousel(carouselId, options = {}) {
 
     _carousels.set(carouselId, carouselState);
 
+    const isWideScreen = window.innerWidth >= 768;
+
     // Запускаем автоскролл, если опция включена
     if (finalOptions.autoScroll) {
         startAutoScroll(carouselId);
@@ -49,14 +51,14 @@ export function initCarousel(carouselId, options = {}) {
         // Настраиваем обработчики событий для автоскролла
         carousel.addEventListener("mouseenter", () => stopAutoScroll(carouselId));
         carousel.addEventListener("mouseleave", () => {
-            if (carouselState.options.autoScroll) {
+            if (carouselState.options.autoScroll && isWideScreen) {
                 startAutoScroll(carouselId);
             }
         });
     }
 
     // Настраиваем обработчики событий для перетаскивания, если опция включена
-    if (finalOptions.enableDrag) {
+    if (finalOptions.enableDrag && isWideScreen) {
         carousel.addEventListener("mousedown", (e) => startDrag(e, carouselId));
         // Следующие обработчики применяем к документу, но с проверкой активной карусели
         document.addEventListener("mouseup", () => endDrag(carouselId));
@@ -69,7 +71,7 @@ export function initCarousel(carouselId, options = {}) {
     }
 
     // Настраиваем обработчик колесика мыши, если опция включена
-    if (finalOptions.enableWheel) {
+    if (finalOptions.enableWheel && isWideScreen) {
         carousel.addEventListener("wheel", (e) => handleWheel(e, carouselId));
     }
 
@@ -223,11 +225,6 @@ function drag(e, carouselId) {
     carousel.scrollLeft = carouselState.scrollLeft - walk;
 }
 
-/**
- * Улучшенный обработчик события прокрутки колесиком мыши
- * @param {WheelEvent} e - Событие колесика мыши
- * @param {string} carouselId - ID элемента карусели
- */
 /**
  * Улучшенный обработчик события прокрутки колесиком мыши
  * @param {WheelEvent} e - Событие колесика мыши

@@ -6,7 +6,8 @@
 const API_CONFIG = {
     BASE_URL: "http://localhost:8080/api",
     ENDPOINTS: {
-        DEVICES: "/devices/getAll"
+        ALL_DEVICES: "/devices/getAll",
+        GET_DEVICE_BY_ID: "/devices/getById",
     }
 };
 
@@ -38,7 +39,7 @@ async function fetchAPI(endpoint, options = {}) {
  */
 export async function fetchDevices() {
     try {
-        const data = await fetchAPI(API_CONFIG.ENDPOINTS.DEVICES);
+        const data = await fetchAPI(API_CONFIG.ENDPOINTS.ALL_DEVICES);
         return data.content || [];
     } catch (error) {
         console.error("Не удалось получить устройства:", error);
@@ -53,7 +54,7 @@ export async function fetchDevices() {
  */
 export async function fetchDeviceById(id) {
     try {
-        const endpoint = `${API_CONFIG.ENDPOINTS.DEVICES}/${id}`;
+        const endpoint = `${API_CONFIG.ENDPOINTS.GET_DEVICE_BY_ID}/${id}`;
         return await fetchAPI(endpoint);
     } catch (error) {
         console.error(`Не удалось получить устройство (ID: ${id}):`, error);

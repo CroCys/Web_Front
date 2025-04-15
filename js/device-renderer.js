@@ -58,43 +58,43 @@ export class DeviceRenderer {
      * @returns {HTMLElement} Элемент карточки
      */
     createDeviceCard(device) {
-    const card = document.createElement('div');
-    card.className = 'device-card no-select'; // запрещаем выделение текста
-    card.dataset.id = device.id;
+        const card = document.createElement('div');
+        card.className = 'device-card no-select'; // запрещаем выделение текста
+        card.dataset.id = device.id;
 
-    const imageUrl = device.images?.length > 0 && device.images[0]?.url
-        ? device.images[0].url
-        : this.defaultImageUrl;
+        const imageUrl = device.images?.length > 0 && device.images[0]?.url
+            ? device.images[0].url
+            : this.defaultImageUrl;
 
-    // Создаём IMG вручную, чтобы отключить drag
-    const img = document.createElement('img');
-    img.src = imageUrl;
-    img.alt = device.name;
-    img.className = 'device-card-image no-drag';
-    img.onerror = () => img.src = this.defaultImageUrl;
-    img.setAttribute('draggable', 'false'); // запрет на drag
+        // Создаём IMG вручную, чтобы отключить drag
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = device.name;
+        img.className = 'device-card-image no-drag';
+        img.onerror = () => img.src = this.defaultImageUrl;
+        img.setAttribute('draggable', 'false'); // запрет на drag
 
-    // Заголовок
-    const title = document.createElement('h3');
-    title.className = 'device-card-title';
-    title.textContent = this.escapeHtml(device.name);
+        // Заголовок
+        const title = document.createElement('h3');
+        title.className = 'device-card-title';
+        title.textContent = this.escapeHtml(device.name);
 
-    // Инфо-блок
-    const info = document.createElement('div');
-    info.className = 'device-card-info';
-    info.innerHTML = `
+        // Инфо-блок
+        const info = document.createElement('div');
+        info.className = 'device-card-info';
+        info.innerHTML = `
         <p>Бренд: ${this.escapeHtml(device.brand || 'Не указан')}</p>
         <p>Релиз: ${this.formatDate(device.releaseDate)}</p>
         <p>Рейтинг: ${this.formatRating(device.averageRating)}</p>
     `;
 
-    // Собираем всё в карточку
-    card.appendChild(img);
-    card.appendChild(title);
-    card.appendChild(info);
+        // Собираем всё в карточку
+        card.appendChild(img);
+        card.appendChild(title);
+        card.appendChild(info);
 
-    return card;
-}
+        return card;
+    }
 
     /**
      * Рендерит список категорий
@@ -182,7 +182,7 @@ export class DeviceRenderer {
 
         // Округляем до одного десятичного знака
         const formattedRating = parseFloat(rating).toFixed(1);
-        return `${formattedRating} / 5.0`;
+        return `${formattedRating} / 10.0`;
     }
 }
 

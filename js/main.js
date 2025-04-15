@@ -4,10 +4,11 @@
 import {closeModal, openModal, setupModalClosing} from './modal.js';
 import {setupNavigation} from './navigation.js';
 import {fetchDevices} from './api.js';
-import {initCarousel} from './carousel.js';
+import {initAllCarousels} from './carousel.js';
 import {Auth, updateUIAfterAuth} from './auth.js';
 import {DeviceRenderer} from './device-renderer.js';
 import {showToast} from "./toast.js";
+import {setupCategories} from './category.js';
 
 // Конфигурация приложения
 const APP_CONFIG = {
@@ -31,18 +32,7 @@ class App {
         setupNavigation();
 
         // Инициализируем карусель
-        initCarousel("popularDevicesCarousel", {
-            autoScroll: true,
-            scrollInterval: 3000,
-            enableDrag: true,
-            enableWheel: true
-        });
-
-        initCarousel("latestDevices", {
-            autoScroll: false,
-            enableDrag: true,
-            enableWheel: true
-        });
+        initAllCarousels();
 
         // Настраиваем работу с модальными окнами
         this.setupModals();
@@ -54,7 +44,7 @@ class App {
         await this.loadDevices();
 
         // Настраиваем категории
-        this.setupCategories();
+        setupCategories();
     }
 
     /**
@@ -178,7 +168,7 @@ class App {
      */
     setupUserProfile() {
         const userProfile = document.getElementById("userProfile");
-        const profileBtn = document.getElementById("profileBtn");
+        const profileBtn = document.getElementById("userProfile");
         const dropdownMenu = document.getElementById("dropdownMenu");
         const logoutBtn = document.getElementById("logoutBtn");
         const profilePageBtn = document.getElementById("profilePageBtn");
@@ -253,7 +243,7 @@ class App {
                 if (popularCarousel) {
                     this.deviceRenderer.renderDevices(popularDevices, popularCarousel, (device) => {
                         // Обработчик клика по устройству
-                        window.location.href = `device.html?id=${device.id}`; 
+                        window.location.href = `device.html?id=${device.id}`;
                     });
                 }
 
@@ -273,63 +263,6 @@ class App {
             }
         } catch (error) {
             console.error("Ошибка при загрузке устройств:", error);
-        }
-    }
-
-    /**
-     * Настраивает работу с категориями
-     */
-    setupCategories() {
-        const categoryCards = document.querySelectorAll(".category-card");
-
-        categoryCards.forEach(card => {
-            card.addEventListener("click", function () {
-                const category = this.dataset.category;
-                window.location.href = `storage.html?category=${category}`;
-            });
-        });
-
-        // Обработка параметров URL для фильтрации по категории
-        const params = new URLSearchParams(window.location.search);
-        const category = params.get("category");
-
-        if (category) {
-            this.loadCategoryItems(category);
-        }
-    }
-
-    /**
-     * Загружает элементы выбранной категории
-     * @param {string} category - Идентификатор категории
-     */
-    loadCategoryItems(category) {
-        // Пример данных карточек
-        const cards = [
-            {id: 1, category: "keyboards", title: "Клавиатура Logitech", description: "Механическая клавиатура"},
-            {id: 2, category: "mice", title: "Мышь Razer", description: "Игровая мышь"},
-            {id: 3, category: "microphones", title: "Микрофон Blue Yeti", description: "Студийный микрофон"},
-            {id: 4, category: "headphones", title: "Наушники Sony", description: "Беспроводные наушники"}
-        ];
-
-        // Фильтрация карточек по категории
-        const filteredCards = category ? cards.filter(card => card.category === category) : cards;
-
-        // Рендеринг карточек
-        const container = document.getElementById("cards-container");
-        if (container) {
-            container.innerHTML = "";
-
-            filteredCards.forEach(card => {
-                const cardElement = document.createElement("div");
-                cardElement.className = "card";
-                cardElement.innerHTML = `
-          <div class="device-card">
-            <h3>${card.title}</h3>
-            <p>${card.description}</p>
-          </div>
-        `;
-                container.appendChild(cardElement);
-            });
         }
     }
 }

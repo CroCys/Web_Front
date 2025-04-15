@@ -15,7 +15,7 @@ export class Navigation {
     constructor({
                     burgerMenuId = 'burgerMenu',
                     navLinksId = 'navLinks',
-                    closeButtonIds = ["loginBtn", "registerBtn", "profileBtn", "switchToRegister", "switchToLogin"]
+                    closeButtonIds = ["loginBtn", "registerBtn", "switchToRegister", "switchToLogin"]
                 } = {}) {
         this.burgerMenu = document.getElementById(burgerMenuId);
         this.navLinks = document.getElementById(navLinksId);
