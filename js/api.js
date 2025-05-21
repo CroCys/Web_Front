@@ -15,18 +15,43 @@ const API_CONFIG = {
  * Выполняет запрос к API
  * @param {string} endpoint - Конечная точка API
  * @param {Object} options - Опции запроса
+ * @param {boolean} isAuth - Требуется ли аутентификация для запроса
  * @returns {Promise<any>} Результат запроса в формате JSON
  * @throws {Error} Ошибка при неудачном запросе
  */
-async function fetchAPI(endpoint, options = {}) {
+async function fetchAPI(endpoint, options = {}, isAuth = false) {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, options);
+        const headers = {
+            "Content-Type": "application/json",
+            ...options.headers
+        };
 
-        if (!response.ok) {
-            throw new Error(`Ошибка запроса: ${response.status} ${response.statusText}`);
+        if (isAuth) {
+            const token = localStorage.getItem("token");
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
         }
 
-        return await response.json();
+        const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+            ...options,
+            headers
+        });
+
+        // Добавляем обработку 401 ошибки
+        if (response.status === 401) {
+            const authEvent = new CustomEvent("auth_required");
+            window.dispatchEvent(authEvent);
+            throw new Error("Требуется авторизация");
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || `Ошибка запроса: ${response.status} ${response.statusText}`);
+        }
+
+        return data;
     } catch (error) {
         console.error(`Ошибка API (${endpoint}):`, error);
         throw error;
@@ -42,8 +67,7 @@ export async function fetchDevices() {
         const data = await fetchAPI(API_CONFIG.ENDPOINTS.ALL_DEVICES);
         return data.content || [];
     } catch (error) {
-        console.error("Не удалось получить устройства:", error);
-        return [];
+        throw error;
     }
 }
 
@@ -57,7 +81,28 @@ export async function fetchDeviceById(id) {
         const endpoint = `${API_CONFIG.ENDPOINTS.GET_DEVICE_BY_ID}/${id}`;
         return await fetchAPI(endpoint);
     } catch (error) {
-        console.error(`Не удалось получить устройство (ID: ${id}):`, error);
-        return null;
+        throw error;
+    }
+}
+
+/**
+ * Получает устройства с поддержкой фильтров
+ * @param {Object} filters - Объект с фильтрами для запроса
+ * @returns {Promise<Array>} Массив устройств
+ */
+export async function fetchDevicesWithFilters(filters = {}) {
+    try {
+        const searchParams = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                searchParams.append(key, value);
+            }
+        });
+
+        const endpoint = `${API_CONFIG.ENDPOINTS.ALL_DEVICES}?${searchParams.toString()}`;
+        const data = await fetchAPI(endpoint);
+        return data.content || [];
+    } catch (error) {
+        throw error;
     }
 }

@@ -182,7 +182,7 @@ export class DeviceRenderer {
 
         // Округляем до одного десятичного знака
         const formattedRating = parseFloat(rating).toFixed(1);
-        return `${formattedRating} / 10.0`;
+        return `${formattedRating}`;
     }
 }
 

@@ -50,7 +50,7 @@ class App {
     /**
      * Настраивает модальные окна
      */
-    setupModals() {
+     setupModals() {
         const loginModal = document.getElementById("loginModal");
         const registerModal = document.getElementById("registerModal");
         const loginBtn = document.getElementById("loginBtn");
@@ -131,7 +131,7 @@ class App {
             closeModal(document.getElementById("loginModal"));
             showToast("Вы успешно вошли", "success")
         } catch (error) {
-            showToast("Неверный email или пароль", "error");
+            showToast(error.message || "Ошибка входа", "error");
             console.error("Ошибка входа:", error);
         }
     }
@@ -158,7 +158,7 @@ class App {
             loginForm.querySelector('input[type="email"]').value = email;
             loginForm.querySelector('input[type="password"]').value = password;
         } catch (error) {
-            showToast("Ошибка регистрации", "error")
+            showToast(error.message || "Ошибка регистрации", "error")
             console.error("Ошибка регистрации:", error);
         }
     }

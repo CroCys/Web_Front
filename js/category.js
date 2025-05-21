@@ -1,22 +1,29 @@
 // 📁 category.js
-import {renderPagination} from './pagination.js';
+import { renderPagination } from './pagination.js';
 
 const PAGE_SIZE = 10;
 
-async function loadCategoryItems(category, page = 0) {
+async function loadCategoryItems(page = 0) {
     const container = document.getElementById("cards-container");
     const pagination = document.getElementById("pagination-container");
     const categoryTitle = document.getElementById("categoryTitle");
 
     if (!container || !pagination) return;
 
-    // Update category title
-    if (categoryTitle) {
-        const categoryName = getCategoryDisplayName(category);
-        categoryTitle.textContent = categoryName;
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('page', page);
+    urlParams.set('size', PAGE_SIZE);
+
+    const category = urlParams.get('category');
+    if (categoryTitle && category) {
+        categoryTitle.textContent = getCategoryDisplayName(category);
     }
 
-    // Show loading state
+    const categorySelect = document.getElementById("categorySelect");
+    if (categorySelect && category) {
+        categorySelect.value = category;
+    }
+
     container.innerHTML = `
         <div class="loading-container">
             <div class="loading-spinner"></div>
@@ -25,16 +32,8 @@ async function loadCategoryItems(category, page = 0) {
     `;
     pagination.innerHTML = "";
 
-    // Update select in the filters panel
-    if (category) {
-        const categorySelect = document.getElementById("categorySelect");
-        if (categorySelect) {
-            categorySelect.value = category;
-        }
-    }
-
     try {
-        const response = await fetch(`http://localhost:8080/api/devices/search?category=${category}&page=${page}&size=${PAGE_SIZE}`);
+        const response = await fetch(`http://localhost:8080/api/devices/search?${urlParams.toString()}`);
         if (!response.ok) throw new Error("Ошибка загрузки данных");
 
         const data = await response.json();
@@ -45,18 +44,12 @@ async function loadCategoryItems(category, page = 0) {
 
         if (cards.length === 0) {
             container.innerHTML = `
-        <div class="empty-results">
-            <i class="fas fa-search"></i>
-            <p>Устройств в этой категории пока нет.</p>
-        </div>
-    `;
-
-            // Скрываем пагинацию
-            const paginationElement = document.querySelector('.pagination');
-            if (paginationElement) {
-                paginationElement.style.display = 'none';
-            }
-
+                <div class="empty-results">
+                    <i class="fas fa-search"></i>
+                    <p>Устройств по заданным параметрам не найдено.</p>
+                </div>
+            `;
+            pagination.style.display = 'none';
             return;
         }
 
@@ -64,7 +57,6 @@ async function loadCategoryItems(category, page = 0) {
             const cardElement = document.createElement("div");
             cardElement.className = "card";
 
-            // Format release date
             const releaseDate = new Date(card.releaseDate);
             const formattedDate = releaseDate.toLocaleDateString('ru-RU', {
                 day: 'numeric',
@@ -72,47 +64,40 @@ async function loadCategoryItems(category, page = 0) {
                 year: 'numeric'
             });
 
-            // Convert 10-point rating to 5-point scale and format with stars
-            const originalRating = card.averageRating ?? 0;
-            const convertedRating = originalRating / 2; // Convert from 10-point to 5-point scale
-
-            const fullStars = Math.floor(convertedRating);
-            const halfStar = convertedRating % 1 >= 0.5;
+            const rating = card.averageRating ?? 0;
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
             const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-            let stars = '';
-            for (let i = 0; i < fullStars; i++) {
-                stars += '<i class="fas fa-star"></i>';
-            }
-            if (halfStar) {
-                stars += '<i class="fas fa-star-half-alt"></i>';
-            }
-            for (let i = 0; i < emptyStars; i++) {
-                stars += '<i class="far fa-star"></i>';
-            }
+            let stars = "";
+            stars += '<i class="fas fa-star"></i>'.repeat(fullStars);
+            if (halfStar) stars += '<i class="fas fa-star-half-alt"></i>';
+            stars += '<i class="far fa-star"></i>'.repeat(emptyStars);
 
             cardElement.innerHTML = `
-        <div class="category-device-card">
-            <h3>${card.name}</h3>
-            <p><strong>Бренд:</strong> ${card.brand}</p>
-            <p>${card.description}</p>
-            <p><strong>Дата выхода:</strong> ${formattedDate}</p>
-            <p class="device-rating">
-                <strong>Оценка:</strong> 
-                ${originalRating ? `<span>${convertedRating.toFixed(1)}</span> <span class="rating-stars">${stars}</span>` : 'Нет данных'}
-            </p>
-        </div>
-    `;
+                <div class="category-device-card">
+                    <h3>${card.name}</h3>
+                    <p><strong>Бренд:</strong> ${card.brand}</p>
+                    <p>${card.description}</p>
+                    <p><strong>Дата выхода:</strong> ${formattedDate}</p>
+                    <p class="device-rating">
+                        <strong>Оценка:&nbsp;&nbsp;</strong> 
+                        ${rating ? `<span>${rating.toFixed(1)}</span> <span class="rating-stars">${stars}</span>` : 'Нет данных'}
+                    </p>
+                </div>
+            `;
 
             cardElement.addEventListener("click", () => {
-                // Navigate to device details page
                 window.location.href = `device.html?id=${card.id}`;
             });
 
             container.appendChild(cardElement);
         });
 
-        renderPagination(pagination, totalPages, page, category, loadCategoryItems);
+        renderPagination(pagination, totalPages, page, (newPage) => {
+            loadCategoryItems(newPage);
+        });
+
     } catch (error) {
         console.error("Ошибка при загрузке карточек:", error);
         container.innerHTML = `
@@ -124,7 +109,6 @@ async function loadCategoryItems(category, page = 0) {
     }
 }
 
-// Helper function to get user-friendly category name
 function getCategoryDisplayName(category) {
     const categoryMap = {
         'MOUSE': 'Мыши',
@@ -132,7 +116,6 @@ function getCategoryDisplayName(category) {
         'HEADPHONES': 'Гарнитуры',
         'MICROPHONE': 'Микрофоны'
     };
-
     return categoryMap[category] || null;
 }
 
@@ -150,13 +133,11 @@ export function setupCategories() {
     const category = params.get("category");
 
     if (category) {
-        loadCategoryItems(category);
+        loadCategoryItems(Number(params.get("page")) || 0);
     } else {
-        // If no category specified, load all devices
-        loadCategoryItems('');
+        loadCategoryItems(0);
     }
 
-    // Setup filter and sort functionality
     setupFilters(category);
 }
 
@@ -173,8 +154,8 @@ function setupFilters(initialCategory) {
             const maxRating = document.getElementById('maxRating').value;
             const minDate = document.getElementById('minDate').value;
             const maxDate = document.getElementById('maxDate').value;
+            const sort = document.getElementById('sortSelect').value;
 
-            // Create query params
             const params = new URLSearchParams();
             if (category) params.append('category', category);
             if (brand) params.append('brand', brand);
@@ -182,22 +163,20 @@ function setupFilters(initialCategory) {
             if (maxRating) params.append('maxRating', maxRating);
             if (minDate) params.append('minDate', minDate);
             if (maxDate) params.append('maxDate', maxDate);
+            if (sort) params.append('sort', sort);
 
-            // Apply filters (in real application, you would fetch filtered results)
-            // For now, we'll just update the URL
+            params.set('page', 0);
+
             window.location.href = `category.html?${params.toString()}`;
         });
     }
 
     if (resetFiltersBtn) {
         resetFiltersBtn.addEventListener('click', () => {
-            // Reset all filter inputs
-            document.getElementById('categorySelect').value = initialCategory || '';
-            document.getElementById('brandInput').value = '';
-            document.getElementById('minRating').value = '';
-            document.getElementById('maxRating').value = '';
-            document.getElementById('minDate').value = '';
-            document.getElementById('maxDate').value = '';
+            const params = new URLSearchParams();
+            if (initialCategory) params.set('category', initialCategory);
+            params.set('page', 0);
+            window.location.href = `category.html?${params.toString()}`;
         });
     }
 
@@ -205,10 +184,30 @@ function setupFilters(initialCategory) {
         sortSelect.addEventListener('change', () => {
             const params = new URLSearchParams(window.location.search);
             params.set('sort', sortSelect.value);
-
-            // Apply sorting (in real application, you would fetch sorted results)
-            // For now, we'll just update the URL
+            params.set('page', 0);
             window.location.href = `category.html?${params.toString()}`;
         });
+    }
+
+    populateFiltersFromURL();
+}
+
+function populateFiltersFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const map = {
+        categorySelect: 'category',
+        brandInput: 'brand',
+        minRating: 'minRating',
+        maxRating: 'maxRating',
+        minDate: 'minDate',
+        maxDate: 'maxDate',
+        sortSelect: 'sort'
+    };
+
+    for (const [inputId, paramName] of Object.entries(map)) {
+        const input = document.getElementById(inputId);
+        if (input && params.has(paramName)) {
+            input.value = params.get(paramName);
+        }
     }
 }

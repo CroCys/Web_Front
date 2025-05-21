@@ -2,6 +2,7 @@
  * Модуль для управления профилем пользователя
  */
 import {Auth, updateUIAfterAuth} from './auth.js';
+import {showToast} from './toast.js';
 
 /**
  * Класс для управления профилем пользователя
@@ -111,13 +112,13 @@ export class UserProfile {
         if (file) {
             // Проверяем тип файла
             if (!file.type.match('image.*')) {
-                alert('Пожалуйста, выберите изображение');
+                showToast("Пожалуйста, выберите изображение", "info");
                 return;
             }
 
             // Проверяем размер файла (макс. 5 МБ)
             if (file.size > 5 * 1024 * 1024) {
-                alert('Размер файла не должен превышать 5 МБ');
+                showToast("Размер файла не должен превышать 5 МБ", "warn");
                 return;
             }
 
